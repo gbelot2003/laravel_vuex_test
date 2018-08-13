@@ -1,12 +1,63 @@
+import {getLocalUser} from "./helpers/auth";
+
+const user = getLocalUser();
+
 export default  {
     state:{
-        welcomeMessage: 'This is from store'
+        currentUser: user,
+        isLoggedIn: !!user,
+        loading: false,
+        auth_error: null,
+        customers:[],
+        welcomeMessage: 'This is from store',
+
     },
     getters:{
         welcome(state){
-            return state.welcomeMessage
+            return state.welcomeMessage;
+        },
+        isLoading(state){
+            return state.loading;
+        },
+        isLoggedIn(state){
+            return state.isLoggedIn;
+        },
+        currentUser(state){
+            return state.currentUser;
+        },
+        authError(state){
+            return state.auth_error;
+        },
+        customers(state){
+            return state.custumers;
         }
     },
-    mutations:{},
-    actions:{}
+    mutations:{
+        login(state){
+            state.loading = true;
+            state.auth_error = null;
+        },
+        loginSuccess(state, payload){
+            state.auth_error = null;
+            state.isLoading = true;
+            state.loading = false;
+            state.currentUser = Object.assign({}, payload.user, {token: payload.access_token});
+            localStorage.setItem("user", JSON.stringify(state.currentUser));
+        },
+        loginFail(state, payload){
+            state.loading = false;
+            state.auth_error = payload.err;
+        },
+        logout(state){
+            localStorage.removeItem("user");
+            state.isLoggedIn = false;
+            state.currentUser = null;
+
+        }
+    },
+    actions:{
+        login(contex){
+            contex.commit('login');
+        }
+    }
 }
